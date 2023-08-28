@@ -1,0 +1,93 @@
+---
+title: "data_adding_noises"
+author: "Yinqiu He"
+date: "7/5/2023"
+output: html_document
+---
+
+
+This file contains codes how to read and preprocess the raw data. 
+
+## 1. Exposure Variable
+
+- FOLIOCC: subject index
+- MEOHP: exposure variable of interest (log transformation applied)
+
+
+```{r}
+exposure_data <- read.csv(file="P01_Phthalate_T1_012020.csv")
+exposure_data <-  exposure_data[c("FOLIOCC","MEOHP")] 
+
+#Apply log transformation to the original exposure variable 
+exposure_data[,2]=log(exposure_data[,2])
+```
+
+
+## 2. Outcome Variable
+
+- FOLIOCC: subject index
+- cbmi: bmi of subjects 
+
+```{r}
+outcome_data <- read.csv("bmi.csv")
+outcome_data <-  outcome_data[c("FOLIOCC", "cbmi")]  #add age to adjust
+```
+
+## 3. Mediators Variable
+
+```{r}
+mediator_data <- read.csv(file="Metab_Lipids.csv")
+```
+
+## 4. Covariates to be adjusted
+
+- FOLIOCC: subject index
+- DELIVERY_SEX: gender
+- age: age
+- Intercept: all values are 1
+
+```{r}
+other_covariates_tmp <- read.csv("bmi.csv")
+other_covariates <- cbind(other_covariates_tmp[c("FOLIOCC", "DELIVERY_SEX", "age")], 
+                          rep(1,nrow(other_covariates_tmp)))
+colnames(other_covariates)[4] <- "Intercept"
+```
+
+
+## 6. Add Gaussian Noises to Data
+```{r}
+d1 = dim(exposure_data)
+exposure_data[,2] = exposure_data[,2] + rnorm( d1[1] ) 
+
+d2 = dim(outcome_data)
+outcome_data[,2] = outcome_data[,2] + rnorm(d2[1])
+
+d3 = dim(mediator_data)
+mediator_data[,2:d3[2]] = mediator_data[,2:d3[2]] + matrix(rnorm(d3[1]*(d3[2]-1)), d3[1], d3[2]-1)
+  
+d4 = dim(other_covariates)
+other_covariates[,2:3] = other_covariates[,2:3] + matrix(rnorm(d4[1]*2), d4[1], 2)
+```
+
+## 6. Preview data
+
+We show the first 3 rows of data in 1-4 parts above.
+```{r}
+head(exposure_data, 3)
+head(outcome_data, 3)
+head(mediator_data[,1:4], 3) #only first 4 columns are shown 
+head(other_covariates, 3)
+```
+
+
+
+
+## 7. Save Data
+```{r}
+# saveRDS(exposure_data, file = "exposure_data.Rds")
+# saveRDS(outcome_data, file = "outcome_data.Rds")
+# saveRDS(mediator_data, file = "mediator_data.Rds")
+# saveRDS(other_covariates, file = "other_covariates.Rds")
+```
+
+

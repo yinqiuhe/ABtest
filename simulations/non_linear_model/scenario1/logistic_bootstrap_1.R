@@ -8,19 +8,14 @@ library(abind)
 #data generation
 #0. parameters
 n <- 500
-# prod_coef <- 0.5^2
-# ratio_coef <- 4
-# alpha_coef <- sqrt(prod_coef*ratio_coef)
-# beta_coef <- sqrt(prod_coef/ratio_coef)
-#0.5, 0.5
 
 alpha_coef <- 0
 beta_coef <- 0
 
 #repeat simulation
-B_num <- n
+B_num <- 500 #bootstrap repetition
 n_repeat <- 500
-num_cores <- 32
+num_cores <- 8 #number of cores for parallel computing
 set.seed(123)
 all_seeds = floor(runif(n_repeat) * 10^5)
 
@@ -28,9 +23,7 @@ all_seeds = floor(runif(n_repeat) * 10^5)
 #classical and adaptive bootstrap
 ########################################
 lambda1 <- 1.9; lambda2 <- 1.9
-
 lambda_alpha <- lambda1*sqrt(n)/log(n); lambda_beta <- lambda2*sqrt(n)/log(n)
-# lambda_alpha <- 0; lambda_beta <- 0
 
 all_boot_pval <- do.call(abind, list( mclapply(mc.cores = num_cores, all_seeds, function(seed.num) {
   set.seed(seed.num)
@@ -45,9 +38,7 @@ all_boot_pval <- do.call(abind, list( mclapply(mc.cores = num_cores, all_seeds, 
   z_beta <- tmp_res$z_beta
   g_alpha_fit_values <- tmp_res$g_alpha_fit_values
   g_beta_fit_values <- tmp_res$g_beta_fit_values
-  # alpha_hat_boot <- tmp_boot_res$alpha_hat
-  # alpha_int_hat_boot <- tmp_boot_res$alpha_int_hat
-  
+   
   
   one_boot_res <- one_ab_bootstrap(my_data, B_num, test_stat, 
                                    alpha_residual, beta_residual,

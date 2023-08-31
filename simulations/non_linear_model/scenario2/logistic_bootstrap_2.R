@@ -10,16 +10,11 @@ library(abind)
 n <- 500
 alpha_coef <- 0
 beta_coef <- 0
-# prod_coef <- 0.25^2
-# ratio_coef <- 4
-# alpha_coef <- sqrt(prod_coef*ratio_coef)
-# beta_coef <- sqrt(prod_coef/ratio_coef)
-#0.5, 0.5
 
 #repeat simulation
-B_num <- n
+B_num <- 500
 n_repeat <- 1000
-num_cores <- 32
+num_cores <- 8 #number of cores for parallel computing
 set.seed(312)
 all_seeds = floor(runif(n_repeat) * 10^5)
 
@@ -27,9 +22,7 @@ all_seeds = floor(runif(n_repeat) * 10^5)
 #classical and adaptive bootstrap
 ########################################
 lambda1 <- 1.9; lambda2 <- 3.3
-
 lambda_alpha <- lambda1*sqrt(n)/log(n); lambda_beta <- lambda2*sqrt(n)/log(n)
-# lambda_alpha <- 0; lambda_beta <- 0
 
 all_boot_pval <- do.call(abind, list( mclapply(mc.cores = num_cores, all_seeds, function(seed.num) {
   set.seed(seed.num)

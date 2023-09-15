@@ -34,10 +34,8 @@ set.seed(mc_ind)
 
 
 ######set tuning parameter######
-lambda1all = 0; lambda2all = 0; #value 0 indicates that AB reduces to classical bootstrap
-lambda_n1_alpha = lambda1all*sqrt(n)/log(n); lambda_n2_alpha = lambda2all*sqrt(n)/log(n)
-lambda_n1_beta = lambda1all*sqrt(n)/log(n); lambda_n2_beta = lambda2all*sqrt(n)/log(n)
-lambda_n1_both = lambda1all*sqrt(n)/log(n); lambda_n2_both = lambda2all*sqrt(n)/log(n)
+lambda1all <- lambda2all <- 0 * sqrt(n)/log(n); 
+lambda_n1_alpha <- lambda_n2_alpha <- lambda_n1_beta <- lambda_n2_beta <- lambda_n1_both <- lambda_n2_both <- lambda_n1_original<- lambda_n2_original <- lambda1all
 ################################################
 
 
@@ -53,11 +51,12 @@ mydata_original = DBmypackage6two::gendata_model_X_C( n,  alpha_coef, beta_coef,
 ################################################
 ######2. Run double bootstrap ######
 ################################################
-res_tmp = DBmypackage6two::boot_tuning_par_two_C(mydata_original, other_covariates, 
+res_tmp = DBmypackage6two::boot_tuning_par_all_C(mydata_original, other_covariates, 
                                                  n,  omega,  num_med,
                                                  lambda_n1_alpha, lambda_n2_alpha, 
                                                  lambda_n1_beta, lambda_n2_beta, 
                                                  lambda_n1_both, lambda_n2_both, 
+                                                 lambda_n1_original, lambda_n2_original, 
                                                  N_boot_out, N_boot_in,
                                                  num_other_alpha, num_other_beta)
 
@@ -66,15 +65,19 @@ res_tmp = DBmypackage6two::boot_tuning_par_two_C(mydata_original, other_covariat
 ################################################
 omega1=0.05 #plot p-values of 1-omega1 level confidence band
 
-#3.1 p-values formed by processed data with \hat{\alpha}=0  (P_{alpha}*(lambda))
+#3.0 p-values estimated by applying double bootstrap to the observed data
+plot_boot_sample = res_tmp$Boot_res_original
+qqplot_with_band_separate(plot_boot_sample, omega1 )
+
+#3.1 p-value estimated by applying double bootstrap to processed data with \hat{\alpha}=0  (P_{alpha}*(lambda))
 alpha_p_val_boot = res_tmp$Boot_res_alpha_0
 qqplot_with_band(alpha_p_val_boot, omega1)
 
-#3.2 p-values formed by processed data with \hat{\beta}=0  (P_{beta}*(lambda)) 
+#3.2 p-values estimated by applying double bootstrap to processed data with \hat{\beta}=0  (P_{beta}*(lambda)) 
 beta_p_val_boot = res_tmp$Boot_res_beta_0 
 qqplot_with_band(beta_p_val_boot, omega1)
 
-#3.3 p-values formed by processed data with  \hat{\alpha}=0 and \hat{\beta}=0  (P_{beta}*(lambda))  P_{alpha,beta}*(lambda)
+#3.3 p-values estimated by applying double bootstrap to processed data with  \hat{\alpha}=0 and \hat{\beta}=0  (P_{beta}*(lambda))  P_{alpha,beta}*(lambda)
 both_p_val_boot = res_tmp$Boot_res_both_0
 qqplot_with_band(both_p_val_boot, omega1)
 
@@ -82,6 +85,7 @@ qqplot_with_band(both_p_val_boot, omega1)
 ######4. Interpretation of results
 ################################################
 #When generating data with alpha_coef = 0.5 and beta_coef=0 and set lambda=0, we expect
+#3.0 double bootstrap to original data gives qq-plots of p-values bend downward if under alternative hypothesis, and vice versa
 #3.1 processed data with \hat{\alpha}=0 is very conservative 
 #3.2 processed data with \hat{\beta}=0 is close to uniform distribution (as alpha_coef is non-zero)
 #3.3 processed data with \hat{\alpha}=0 and \hat{\beta}=0 is very conservative  
